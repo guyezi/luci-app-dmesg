@@ -3,9 +3,9 @@
 'require ui';
 
 return L.view.extend({
-	tail_default: 25,
+	tailDefault: 25,
 
-	parse_log_data: function(logdata) {
+	parseLogData: function(logdata) {
 		return logdata.trim().split(/\n/).map(line => line.replace(/^<\d+>/, ''));
 	},
 
@@ -17,132 +17,132 @@ return L.view.extend({
 	},
 
 	render: function(logdata) {
-		let nav_btns_top = '120px';
-		let loglines = this.parse_log_data(logdata);
+		let navBtnsTop = '120px';
+		let loglines = this.parseLogData(logdata);
 
-		 let log_textarea = E('textarea', {
+		 let logTextarea = E('textarea', {
 			'id': 'syslog',
 			'class': 'cbi-input-textarea',
 			'style': 'width:100% !important; resize:horizontal; padding: 0 0 0 45px; font-size:12px',
 			'readonly': 'readonly',
 			'wrap': 'off',
-			'rows': this.tail_default,
+			'rows': this.tailDefault,
 			'spellcheck': 'false',
-		}, [ loglines.slice(-this.tail_default).join('\n') ]);
+		}, [ loglines.slice(-this.tailDefault).join('\n') ]);
 
-		let tail_value = E('input', {
-			'id': 'tail_value',
-			'name': 'tail_value',
+		let tailValue = E('input', {
+			'id': 'tailValue',
+			'name': 'tailValue',
 			'type': 'text',
-			'form': 'log_form',
+			'form': 'logForm',
 			'class': 'cbi-input-text',
 			'style': 'width:4em !important; min-width:4em !important',
 			'maxlength': 5,
 		});
-		tail_value.value = this.tail_default;
-		ui.addValidator(tail_value, 'uinteger', true);
+		tailValue.value = this.tailDefault;
+		ui.addValidator(tailValue, 'uinteger', true);
 
-		let log_filter = E('input', {
-			'id': 'log_filter',
-			'name': 'log_filter',
+		let logFilter = E('input', {
+			'id': 'logFilter',
+			'name': 'logFilter',
 			'type': 'text',
-			'form': 'log_form',
+			'form': 'logForm',
 			'class': 'cbi-input-text',
 			'style': 'margin-left:1em !important; width:16em !important; min-width:16em !important',
 			'placeholder': _('Message filter'),
 			'data-tooltip': _('Filter messages with a regexp'),
 		});
 
-		let log_form_submit_btn = E('input', {
+		let logFormSubmitBtn = E('input', {
 			'type': 'submit',
-			'form': 'log_form',
+			'form': 'logForm',
 			'class': 'cbi-button btn',
 			'style': 'margin-left:1em !important; vertical-align:middle',
 			'value': _('Apply'),
 			'click': ev => ev.target.blur(),
 		});
 
-		function set_log_tail(c_arr) {
-			let tail_num_val = tail_value.value;
-			if(tail_num_val && tail_num_val > 0 && c_arr) {
-				return c_arr.slice(-tail_num_val);
+		function setLogTail(cArr) {
+			let tailNumVal = tailValue.value;
+			if(tailNumVal && tailNumVal > 0 && cArr) {
+				return cArr.slice(-tailNumVal);
 			};
-			return c_arr;
+			return cArr;
 		}
 
-		function set_log_filter(c_arr) {
-			let f_pattern = log_filter.value;
-			if(!f_pattern) {
-				return c_arr;
+		function setLogFilter(cArr) {
+			let fPattern = logFilter.value;
+			if(!fPattern) {
+				return cArr;
 			};
-			let f_arr = [];
+			let fArr = [];
 			try {
-				f_arr = c_arr.filter(s => new RegExp(f_pattern.toLowerCase()).test(s.toLowerCase()));
+				fArr = cArr.filter(s => new RegExp(fPattern.toLowerCase()).test(s.toLowerCase()));
 			} catch(err) {
 				if(err.name === 'SyntaxError') {
 					ui.addNotification(null,
 						E('p', {}, _('Wrong regular expression') + ': ' + err.message));
-					return c_arr;
+					return cArr;
 				} else {
 					throw err;
 				};
 			};
-			if(f_arr.length === 0) {
-				f_arr.push(_('No matches...'));
+			if(fArr.length === 0) {
+				fArr.push(_('No matches...'));
 			};
-			return f_arr;
+			return fArr;
 		}
 
 		return E([
-			E('h2', { 'id': 'log_title', 'class': 'fade-in' }, _('Kernel Log')),
+			E('h2', { 'id': 'logTitle', 'class': 'fade-in' }, _('Kernel Log')),
 			E('div', { 'class': 'cbi-section-descr fade-in' }),
 			E('div', { 'class': 'cbi-section fade-in' },
 				E('div', { 'class': 'cbi-section-node' },
-					E('div', { 'id': 'content_syslog', 'class': 'cbi-value' }, [
-						E('label', { 'class': 'cbi-value-title', 'for': 'tail_value' },
+					E('div', { 'id': 'contentSyslog', 'class': 'cbi-value' }, [
+						E('label', { 'class': 'cbi-value-title', 'for': 'tailValue' },
 							_('Show only the last messages')),
 						E('div', { 'class': 'cbi-value-field' }, [
-							tail_value,
+							tailValue,
 							E('input', {
 								'type': 'button',
 								'class': 'cbi-button btn cbi-button-reset',
 								'value': 'Χ',
 								'click': ev => {
-									tail_value.value = null;
-									log_form_submit_btn.click();
+									tailValue.value = null;
+									logFormSubmitBtn.click();
 									ev.target.blur();
 								},
 
 							}),
-							log_filter,
+							logFilter,
 							E('input', {
 								'type': 'button',
 								'class': 'cbi-button btn cbi-button-reset',
 								'value': 'Χ',
 								'click': ev => {
-									log_filter.value = null;
-									log_form_submit_btn.click();
+									logFilter.value = null;
+									logFormSubmitBtn.click();
 									ev.target.blur();
 								},
 							}),
-							log_form_submit_btn,
+							logFormSubmitBtn,
 							E('form', {
-								'id': 'log_form',
-								'name': 'log_form',
+								'id': 'logForm',
+								'name': 'logForm',
 								'style': 'display:inline-block; margin-left:1em !important',
 								'submit': ui.createHandlerFn(this, function(ev) {
 									ev.preventDefault();
-									let form_elems = Array.from(document.forms.log_form.elements);
-									form_elems.forEach(e => e.disabled = true);
+									let formElems = Array.from(document.forms.logForm.elements);
+									formElems.forEach(e => e.disabled = true);
 
 									return this.load().then(logdata => {
-										let loglines = set_log_filter(set_log_tail(
-											this.parse_log_data(logdata)));
-										log_textarea.rows = (loglines.length < this.tail_default) ?
-											this.tail_default : loglines.length;
-										log_textarea.value = loglines.join('\n');
+										let loglines = setLogFilter(setLogTail(
+											this.parseLogData(logdata)));
+										logTextarea.rows = (loglines.length < this.tailDefault) ?
+											this.tailDefault : loglines.length;
+										logTextarea.value = loglines.join('\n');
 									}).finally(() => {
-										form_elems.forEach(e => e.disabled = false);
+										formElems.forEach(e => e.disabled = false);
 									});
 								}),
 							}, E('span', {}, '&#160;')),
@@ -157,23 +157,23 @@ return L.view.extend({
 							E('button', {
 								'class': 'btn',
 								'style': 'position:relative; display:block; margin:0 !important; left:1px; top:'
-									+ nav_btns_top,
+									+ navBtnsTop,
 								'click': ev => {
-									document.getElementById('log_title').scrollIntoView(true);
+									document.getElementById('logTitle').scrollIntoView(true);
 									ev.target.blur();
 								},
 							}, '&#8593;'),
 							E('button', {
 								'class': 'btn',
 								'style': 'position:relative; display:block; margin:0 !important; margin-top:1px !important; left:1px; top:'
-									+ nav_btns_top,
+									+ navBtnsTop,
 								'click': ev => {
-									log_textarea.scrollIntoView(false);
+									logTextarea.scrollIntoView(false);
 									ev.target.blur();
 								},
 							}, '&#8595;'),
 						]),
-						log_textarea,
+						logTextarea,
 					])
 				)
 			),
