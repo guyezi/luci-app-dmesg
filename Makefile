@@ -6,7 +6,8 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=luci-app-dmesg
+PKG_VERSION:=0.4
+PKG_RELEASE:=1
 LUCI_TITLE:=Advanced kernel log (tail, search)
 LUCI_DEPENDS:=+luci-mod-admin-full
 LUCI_PKGARCH:=all
