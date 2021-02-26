@@ -17,7 +17,7 @@ return L.view.extend({
 	},
 
 	render: function(logdata) {
-		let navBtnsTop = '120px';
+		let navBtnsTop = '1px';
 		let loglines = this.parseLogData(logdata);
 
 		 let logTextarea = E('textarea', {
