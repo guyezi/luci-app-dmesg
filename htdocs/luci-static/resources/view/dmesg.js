@@ -77,7 +77,7 @@ return L.view.extend({
 			};
 			let fArr = [];
 			try {
-				fArr = cArr.filter(s => new RegExp(fPattern.toLowerCase()).test(s.toLowerCase()));
+				fArr = cArr.filter(s => new RegExp(fPattern, 'iu').test(s));
 			} catch(err) {
 				if(err.name === 'SyntaxError') {
 					ui.addNotification(null,
