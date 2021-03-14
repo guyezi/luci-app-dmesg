@@ -9,6 +9,37 @@ return L.view.extend({
 		return logdata.trim().split(/\n/).map(line => line.replace(/^<\d+>/, ''));
 	},
 
+	setLogTail: function(cArr) {
+		let tailNumVal = document.getElementById('tailValue').value;
+		if(tailNumVal && tailNumVal > 0 && cArr) {
+			return cArr.slice(-tailNumVal);
+		};
+		return cArr;
+	},
+
+	setLogFilter: function(cArr) {
+		let fPattern = document.getElementById('logFilter').value;
+		if(!fPattern) {
+			return cArr;
+		};
+		let fArr = [];
+		try {
+			fArr = cArr.filter(s => new RegExp(fPattern, 'iu').test(s));
+		} catch(err) {
+			if(err.name === 'SyntaxError') {
+				ui.addNotification(null,
+					E('p', {}, _('Wrong regular expression') + ': ' + err.message));
+				return cArr;
+			} else {
+				throw err;
+			};
+		};
+		if(fArr.length === 0) {
+			fArr.push(_('No matches...'));
+		};
+		return fArr;
+	},
+
 	load: function() {
 		return fs.exec_direct('/bin/dmesg', [ '-r' ]).catch(e => {
 			ui.addNotification(null, E('p', {}, _('Unable to load log data: ' + err.message)));
@@ -49,8 +80,8 @@ return L.view.extend({
 			'form': 'logForm',
 			'class': 'cbi-input-text',
 			'style': 'min-width:16em !important; margin-right:1em !important; margin-bottom:0.3em !important',
-			'placeholder': _('Message filter'),
-			'data-tooltip': _('Filter messages with a regexp'),
+			'placeholder': _('Entries filter'),
+			'data-tooltip': _('Filter entries using regexp'),
 		});
 
 		let logFormSubmitBtn = E('input', {
@@ -62,37 +93,6 @@ return L.view.extend({
 			'click': ev => ev.target.blur(),
 		});
 
-		function setLogTail(cArr) {
-			let tailNumVal = tailValue.value;
-			if(tailNumVal && tailNumVal > 0 && cArr) {
-				return cArr.slice(-tailNumVal);
-			};
-			return cArr;
-		}
-
-		function setLogFilter(cArr) {
-			let fPattern = logFilter.value;
-			if(!fPattern) {
-				return cArr;
-			};
-			let fArr = [];
-			try {
-				fArr = cArr.filter(s => new RegExp(fPattern, 'iu').test(s));
-			} catch(err) {
-				if(err.name === 'SyntaxError') {
-					ui.addNotification(null,
-						E('p', {}, _('Wrong regular expression') + ': ' + err.message));
-					return cArr;
-				} else {
-					throw err;
-				};
-			};
-			if(fArr.length === 0) {
-				fArr.push(_('No matches...'));
-			};
-			return fArr;
-		}
-
 		return E([
 			E('h2', { 'id': 'logTitle', 'class': 'fade-in' }, _('Kernel Log')),
 			E('div', { 'class': 'cbi-section-descr fade-in' }),
@@ -103,7 +103,7 @@ return L.view.extend({
 							'class': 'cbi-value-title',
 							'for': 'tailValue',
 							'style': 'margin-bottom:0.3em !important',
-						}, _('Show only the last messages')),
+						}, _('Show only the last entries')),
 						E('div', { 'class': 'cbi-value-field' }, [
 							tailValue,
 							E('input', {
@@ -130,7 +130,7 @@ return L.view.extend({
 									formElems.forEach(e => e.disabled = true);
 
 									return this.load().then(logdata => {
-										let loglines = setLogFilter(setLogTail(
+										let loglines = this.setLogFilter(this.setLogTail(
 											this.parseLogData(logdata)));
 										logTextarea.rows = (loglines.length < this.tailDefault) ?
 											this.tailDefault : loglines.length;
@@ -145,31 +145,29 @@ return L.view.extend({
 				)
 			),
 			E('div', { 'class': 'cbi-section fade-in' },
-				E('div', { 'class': 'cbi-section-node' },
-					E('div', { 'class': 'cbi-value' }, [
-						E('div', { 'style': 'position:fixed' }, [
-							E('button', {
-								'class': 'btn',
-								'style': 'position:relative; display:block; margin:0 !important; left:1px; top:'
-									+ navBtnsTop,
-								'click': ev => {
-									document.getElementById('logTitle').scrollIntoView(true);
-									ev.target.blur();
-								},
-							}, '&#8593;'),
-							E('button', {
-								'class': 'btn',
-								'style': 'position:relative; display:block; margin:0 !important; margin-top:1px !important; left:1px; top:'
-									+ navBtnsTop,
-								'click': ev => {
-									logTextarea.scrollIntoView(false);
-									ev.target.blur();
-								},
-							}, '&#8595;'),
-						]),
-						logTextarea,
-					])
-				)
+				E('div', { 'class': 'cbi-section-node' }, [
+					E('div', { 'style': 'position:fixed' }, [
+						E('button', {
+							'class': 'btn',
+							'style': 'position:relative; display:block; margin:0 !important; left:1px; top:'
+								+ navBtnsTop,
+							'click': ev => {
+								document.getElementById('logTitle').scrollIntoView(true);
+								ev.target.blur();
+							},
+						}, '&#8593;'),
+						E('button', {
+							'class': 'btn',
+							'style': 'position:relative; display:block; margin:0 !important; margin-top:1px !important; left:1px; top:'
+								+ navBtnsTop,
+							'click': ev => {
+								logTextarea.scrollIntoView(false);
+								ev.target.blur();
+							},
+						}, '&#8595;'),
+					]),
+					logTextarea,
+				])
 			),
 		]);
 	},
