@@ -41,8 +41,8 @@ return L.view.extend({
 	},
 
 	load: function() {
-		return fs.exec_direct('/bin/dmesg', [ '-r' ]).catch(e => {
-			ui.addNotification(null, E('p', {}, _('Unable to load log data: ' + err.message)));
+		return fs.exec_direct('/bin/dmesg', [ '-r' ]).catch(err => {
+			ui.addNotification(null, E('p', {}, _('Unable to load log data:') + ' ' + err.message));
 			return '';
 		});
 	},
